@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  nextcloud-db:
+    image: mysql:8.0
+    container_name: nextcloud-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: nextcloud_root_password
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: nextcloud_password
+    volumes:
+      - nextcloud_db_data:/var/lib/mysql
+    networks:
+      - nextcloud-network
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud-app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: nextcloud_password
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: admin123
+    volumes:
+      - nextcloud_data:/var/www/html
+    depends_on:
+      - nextcloud-db
+    networks:
+      - nextcloud-network
+
+volumes:
+  nextcloud_data:
+  nextcloud_db_data:
+
+networks:
+  nextcloud-network:
+    driver: bridge
